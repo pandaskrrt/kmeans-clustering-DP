@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
@@ -13,6 +13,7 @@ model User {
   username  String   @unique
   password  String   @db.Text
   role      Role     @default(USER)
+  verified  Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -20,4 +21,66 @@ model User {
 enum Role {
   USER
   ADMIN
+}
+
+model DataWarga {
+  id               Int            @id @default(autoincrement())
+  nama_warga       String         @unique
+  nik              String         @unique
+  jumlahKeluarga   JumlahKeluarga @relation(fields: [jumlahKeluargaId], references: [id])
+  jumlahKeluargaId Int
+  bangunanRumah    BangunanRumah  @relation(fields: [bangunanRumahId], references: [id])
+  bangunanRumahId  Int
+  peternakan       Peternakan     @relation(fields: [peternakanId], references: [id])
+  peternakanId     Int
+  kendaraan        Kendaraan      @relation(fields: [kendaraanId], references: [id])
+  kendaraanId      Int
+  Pertanian        Pertanian      @relation(fields: [PertanianId], references: [id])
+  PertanianId      Int
+  penghasilan      Penghasilan    @relation(fields: [penghasilanId], references: [id])
+  penghasilanId    Int
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+}
+
+model JumlahKeluarga {
+  id             Int         @id @default(autoincrement())
+  jumlahKeluarga String
+  bobot          Float
+  dataWarga      DataWarga[]
+}
+
+model BangunanRumah {
+  id        Int         @id @default(autoincrement())
+  bangunan  String
+  bobot     Float
+  dataWarga DataWarga[]
+}
+
+model Peternakan {
+  id         Int         @id @default(autoincrement())
+  peternakan String
+  bobot      Float
+  dataWarga  DataWarga[]
+}
+
+model Kendaraan {
+  id        Int         @id @default(autoincrement())
+  kendaraan String
+  bobot     Float
+  dataWarga DataWarga[]
+}
+
+model Pertanian {
+  id         Int         @id @default(autoincrement())
+  lahanSawah String
+  bobot      Float
+  dataWarga  DataWarga[]
+}
+
+model Penghasilan {
+  id          Int         @id @default(autoincrement())
+  penghasilan String
+  bobot       Float
+  dataWarga   DataWarga[]
 }

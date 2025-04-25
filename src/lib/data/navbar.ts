@@ -1,6 +1,7 @@
 import BookOpen from 'lucide-svelte/icons/book-open'
 import Bot from 'lucide-svelte/icons/bot'
 import SquareTerminal from 'lucide-svelte/icons/square-terminal'
+import Users from 'lucide-svelte/icons/users'
 
 export type AdminNavMenutype = {
 	title: string
@@ -30,28 +31,24 @@ export const adminNavMenu: AdminNavMenutype = [
 		]
 	},
 	{
-		title: 'Pembayaran',
-		url: '/admin/pembayaran',
-		icon: Bot,
+		title: 'Data',
+		url: '/admin/data',
+		icon: Users,
 		items: [
 			{
-				title: 'Semua Pembayaran',
-				url: '/admin/pembayaran'
+				title: 'Data Warga',
+				url: '/admin/data-warga'
 			}
 		]
 	},
 	{
-		title: 'Pembayaran User',
-		url: '/admin/pembayaran-user',
-		icon: BookOpen,
+		title: 'Clustering',
+		url: '/admin/clustering',
+		icon: Users,
 		items: [
 			{
-				title: 'Histori Pembayaran',
-				url: '/admin/pembayaran-user'
-			},
-			{
-				title: 'Perlu Verifikasi',
-				url: '/admin/pembayaran-user?verified=false'
+				title: 'Pilih Clustering',
+				url: '/admin/data-warga'
 			}
 		]
 	}
