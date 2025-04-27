@@ -42,6 +42,37 @@ export const adminNavMenu: AdminNavMenutype = [
 		]
 	},
 	{
+		title: 'Data Bobot',
+		url: '/admin/data',
+		icon: Users,
+		items: [
+			{
+				title: 'Data Jumlah Keluarga',
+				url: '/admin/data-jumlah-keluarga'
+			},
+			{
+				title: 'Data Bangunan Rumah',
+				url: '/admin/bangunan-rumah'
+			},
+			{
+				title: 'Peternakan',
+				url: '/admin/peternakan'
+			},
+			{
+				title: 'Kendaraan',
+				url: '/admin/kendaraan'
+			},
+			{
+				title: 'Pertanian',
+				url: '/admin/pertanian'
+			},
+			{
+				title: 'Penghasilan',
+				url: '/admin/penghasilan'
+			}
+		]
+	},
+	{
 		title: 'Clustering',
 		url: '/admin/clustering',
 		icon: Users,

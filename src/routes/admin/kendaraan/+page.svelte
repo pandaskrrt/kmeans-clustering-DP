@@ -11,17 +11,17 @@
 </script>
 
 <div class="container">
-	<h2 class="title">Data Jumlah Keluarga</h2>
+	<h2 class="title">Data Kendaraan</h2>
 
 	<div class="table-header">
 		<div class="left-toolbar">
-			<Button href="/admin/data-jumlah-keluarga/tambah">
+			<Button href="/admin/kendaraan/tambah">
 				<Plus class="icon" />
 				<span>Tambahkan Data</span>
 			</Button>
 		</div>
 		<div class="right-search">
-			<Input type="text" placeholder="Cari jumlah keluarga" bind:value={search} />
+			<Input type="text" placeholder="Cari Kendaraan" bind:value={search} />
 		</div>
 	</div>
 
@@ -30,20 +30,20 @@
 			<Table.Header>
 				<Table.Row>
 					<Table.Head class="w-[50px] text-center">No</Table.Head>
-					<Table.Head>Jumlah Keluarga</Table.Head>
+					<Table.Head>Kendaraan</Table.Head>
 					<Table.Head>Bobot</Table.Head>
 					<Table.Head class="text-right">Aksi</Table.Head>
 				</Table.Row>
 			</Table.Header>
 			<Table.Body>
-				{#if data.jumlahKeluarga.length > 0}
-					{#each data.jumlahKeluarga.filter((item) => item.jumlahKeluarga
+				{#if data.kendaraan.length > 0}
+					{#each data.kendaraan.filter((item) => item.kendaraan
 							.toString()
 							.toLowerCase()
 							.includes(search.toLowerCase())) as item, index (item.id)}
 						<Table.Row>
 							<Table.Cell class="text-center">{index + 1}</Table.Cell>
-							<Table.Cell>{item.jumlahKeluarga}</Table.Cell>
+							<Table.Cell>{item.kendaraan}</Table.Cell>
 							<Table.Cell>{item.bobot}</Table.Cell>
 							<Table.Cell class="text-right">
 								{#if data.session.role === 'ADMIN'}
@@ -51,7 +51,7 @@
 										<Button
 											size="sm"
 											variant="outline"
-											href={`/admin/data-jumlah-keluarga/edit?id=${item.id}`}
+											href={`/admin/kendaraan/edit?id=${item.id}`}
 										>
 											Edit
 										</Button>
