@@ -42,7 +42,7 @@ export const adminNavMenu: AdminNavMenutype = [
 		]
 	},
 	{
-		title: 'Data Bobot',
+		title: 'Data Kriteria',
 		url: '/admin/data',
 		icon: Users,
 		items: [
