@@ -3,6 +3,7 @@
 	import { Input } from '$lib/components/ui/input'
 	import * as Table from '$lib/components/ui/table'
 	import Plus from 'lucide-svelte/icons/plus'
+	import Replace from 'lucide-svelte/icons/replace'
 	import { enhance } from '$app/forms'
 	import type { PageData } from './$types'
 
@@ -11,7 +12,7 @@
 </script>
 
 <div class="container">
-	<h2 class="title">Data Bangunan Rumah</h2>
+	<h2 class="title">Data Warga</h2>
 
 	<div class="table-header">
 		<div class="left-toolbar">

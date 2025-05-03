@@ -59,6 +59,6 @@ export const actions: Actions = {
 			}
 		})
 
-		redirect(303, '/dashboard/data-warga')
+		redirect(303, '/admin/data-warga')
 	}
 }

@@ -16,21 +16,6 @@ export type AdminNavMenutype = {
 
 export const adminNavMenu: AdminNavMenutype = [
 	{
-		title: 'User',
-		url: '/admin/user',
-		icon: SquareTerminal,
-		items: [
-			{
-				title: 'Semua User',
-				url: '/admin/user'
-			},
-			{
-				title: 'Perlu Verifikasi',
-				url: '/admin/user?verified=false'
-			}
-		]
-	},
-	{
 		title: 'Data',
 		url: '/admin/data',
 		icon: Users,
@@ -78,8 +63,12 @@ export const adminNavMenu: AdminNavMenutype = [
 		icon: Users,
 		items: [
 			{
-				title: 'Pilih Clustering',
-				url: '/admin/data-warga'
+				title: 'Data Hasil Clustering',
+				url: '/admin/clustering'
+			},
+			{
+				title: 'Proses Clustering',
+				url: '/admin/proses-clustering'
 			}
 		]
 	}
