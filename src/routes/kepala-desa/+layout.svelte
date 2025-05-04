@@ -1,4 +1,3 @@
-<!-- src/routes/+layout.svelte -->
 <script lang="ts">
 	import { page } from '$app/stores'
 	import * as Avatar from '$lib/components/ui/avatar/index.js'
