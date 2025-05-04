@@ -10,10 +10,13 @@ import type { PageServerLoad } from './$types'
 
 export const load: PageServerLoad = async ({ locals }) => {
 	if (locals.session) {
-		if (locals.session.role === 'ADMIN') {
-			redirect(302, '/admin')
-		} else if (locals.session.role === 'USER') {
-			redirect(302, '/dashboard')
+		switch (locals.session.role) {
+			case 'ADMIN':
+				redirect(302, '/admin')
+			case 'KADES':
+				redirect(302, '/kepala-desa')
+			case 'USER':
+				redirect(302, '/dashboard')
 		}
 	}
 
@@ -52,7 +55,11 @@ export const actions: Actions = {
 		}
 
 		const authToken = await jwt.sign(
-			{ id: userExist.id, username: userExist.username, role: userExist.role },
+			{
+				id: userExist.id,
+				username: userExist.username,
+				role: userExist.role
+			},
 			SECRET_JWT_TOKEN,
 			{ expiresIn: '24h' }
 		)
@@ -60,14 +67,19 @@ export const actions: Actions = {
 		event.cookies.set('authToken', authToken, {
 			path: '/',
 			httpOnly: true,
-			sameSite: true,
-			maxAge: 60 * 60 * 24
+			sameSite: 'strict',
+			secure: process.env.NODE_ENV === 'production',
+			maxAge: 60 * 60 * 24 // 24 jam
 		})
 
-		if (userExist.role === 'ADMIN') {
-			redirect(303, '/admin')
+		// Redirect berdasarkan role
+		switch (userExist.role) {
+			case 'ADMIN':
+				redirect(303, '/admin')
+			case 'KADES':
+				redirect(303, '/kepala-desa')
+			default:
+				redirect(303, '/dashboard')
 		}
-
-		redirect(303, '/dashboard')
 	}
 }
