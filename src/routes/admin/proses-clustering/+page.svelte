@@ -84,37 +84,39 @@
 			<div class="card">
 				<h3>Centroid</h3>
 				<div class="iteration-grid">
-					{#each [0, 1] as iter}
-						<div class="table-container">
-							<h4
-								class="flex items-center rounded-t-lg border-b border-gray-200 bg-gray-100 px-4 py-2 text-lg font-semibold text-gray-800"
-							>
-								<span
-									class="mr-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-blue-500 text-sm text-white"
+					{#each [0, 1, 2] as iter}
+						{#if data.iterations[iter]}
+							<div class="table-container">
+								<h4
+									class="flex items-center rounded-t-lg border-b border-gray-200 bg-gray-100 px-4 py-2 text-lg font-semibold text-gray-800"
 								>
-									{iter + 1}
-								</span>
-								Iterasi {iter + 1}
-							</h4>
-							<Table.Root>
-								<Table.Header>
-									<Table.Row>
-										<Table.Head>Kriteria</Table.Head>
-										<Table.Head>Cluster 1</Table.Head>
-										<Table.Head>Cluster 2</Table.Head>
-									</Table.Row>
-								</Table.Header>
-								<Table.Body>
-									{#each criteriaNames as name, i}
+									<span
+										class="mr-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-blue-500 text-sm text-white"
+									>
+										{iter + 1}
+									</span>
+									Iterasi {iter + 1}
+								</h4>
+								<Table.Root>
+									<Table.Header>
 										<Table.Row>
-											<Table.Cell>{name}</Table.Cell>
-											<Table.Cell>{data.iterations[iter].centroids[0][i].toFixed(2)}</Table.Cell>
-											<Table.Cell>{data.iterations[iter].centroids[1][i].toFixed(2)}</Table.Cell>
+											<Table.Head>Kriteria</Table.Head>
+											<Table.Head>Cluster 1</Table.Head>
+											<Table.Head>Cluster 2</Table.Head>
 										</Table.Row>
-									{/each}
-								</Table.Body>
-							</Table.Root>
-						</div>
+									</Table.Header>
+									<Table.Body>
+										{#each criteriaNames as name, i}
+											<Table.Row>
+												<Table.Cell>{name}</Table.Cell>
+												<Table.Cell>{data.iterations[iter].centroids[0][i].toFixed(2)}</Table.Cell>
+												<Table.Cell>{data.iterations[iter].centroids[1][i].toFixed(2)}</Table.Cell>
+											</Table.Row>
+										{/each}
+									</Table.Body>
+								</Table.Root>
+							</div>
+						{/if}
 					{/each}
 				</div>
 			</div>
@@ -123,57 +125,62 @@
 			<div class="card">
 				<h3>Hasil Clustering</h3>
 				<div class="iteration-grid">
-					{#each [0, 1] as iter}
-						<div class="table-container">
-							<h4
-								class="flex items-center rounded-t-lg border-b border-gray-200 bg-gray-100 px-4 py-2 text-lg font-semibold text-gray-800"
-							>
-								<span
-									class="mr-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-blue-500 text-sm text-white"
+					{#each [0, 1, 2] as iter}
+						{#if data.iterations[iter]}
+							<div class="table-container">
+								<h4
+									class="flex items-center rounded-t-lg border-b border-gray-200 bg-gray-100 px-4 py-2 text-lg font-semibold text-gray-800"
 								>
-									{iter + 1}
-								</span>
-								Iterasi {iter + 1}
-							</h4>
-							<Table.Root>
-								<Table.Header>
-									<Table.Row>
-										<Table.Head>No</Table.Head>
-										<Table.Head>Nama</Table.Head>
-										<Table.Head>Jarak ke C1</Table.Head>
-										<Table.Head>Jarak ke C2</Table.Head>
-										<Table.Head>Cluster</Table.Head>
-										<Table.Head>Kelayakan</Table.Head>
-									</Table.Row>
-								</Table.Header>
-								<Table.Body>
-									{#each data.clusteringResults as result, i}
-										{#if result.nama.toLowerCase().includes(search.toLowerCase())}
-											<Table.Row
-												class={data.iterations[iter].assignments[i] === 0
-													? 'cluster-1'
-													: 'cluster-2'}
-											>
-												<Table.Cell>{i + 1}</Table.Cell>
-												<Table.Cell>{result.nama}</Table.Cell>
-												<Table.Cell>{data.iterations[iter].distances[i].c1.toFixed(2)}</Table.Cell>
-												<Table.Cell>{data.iterations[iter].distances[i].c2.toFixed(2)}</Table.Cell>
-												<Table.Cell>Cluster {data.iterations[iter].assignments[i] + 1}</Table.Cell>
-												<Table.Cell>
-													<span
-														class="status-badge {data.iterations[iter].assignments[i] === 0
-															? 'eligible'
-															: 'not-eligible'}"
+									<span
+										class="mr-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-blue-500 text-sm text-white"
+									>
+										{iter + 1}
+									</span>
+									Iterasi {iter + 1}
+								</h4>
+								<Table.Root>
+									<Table.Header>
+										<Table.Row>
+											<Table.Head>No</Table.Head>
+											<Table.Head>Nama</Table.Head>
+											<Table.Head>Jarak ke C1</Table.Head>
+											<Table.Head>Jarak ke C2</Table.Head>
+											<Table.Head>Cluster</Table.Head>
+											<Table.Head>Kelayakan</Table.Head>
+										</Table.Row>
+									</Table.Header>
+									<Table.Body>
+										{#each data.clusteringResults as result, i}
+											{#if result.nama.toLowerCase().includes(search.toLowerCase())}
+												<Table.Row
+													class={data.iterations[iter].assignments[i] === 0
+														? 'cluster-1'
+														: 'cluster-2'}
+												>
+													<Table.Cell>{i + 1}</Table.Cell>
+													<Table.Cell>{result.nama}</Table.Cell>
+													<Table.Cell>{data.iterations[iter].distances[i].c1.toFixed(2)}</Table.Cell
 													>
-														{data.iterations[iter].assignments[i] === 0 ? 'Layak' : 'Tidak Layak'}
-													</span>
-												</Table.Cell>
-											</Table.Row>
-										{/if}
-									{/each}
-								</Table.Body>
-							</Table.Root>
-						</div>
+													<Table.Cell>{data.iterations[iter].distances[i].c2.toFixed(2)}</Table.Cell
+													>
+													<Table.Cell>Cluster {data.iterations[iter].assignments[i] + 1}</Table.Cell
+													>
+													<Table.Cell>
+														<span
+															class="status-badge {data.iterations[iter].assignments[i] === 0
+																? 'eligible'
+																: 'not-eligible'}"
+														>
+															{data.iterations[iter].assignments[i] === 0 ? 'Layak' : 'Tidak Layak'}
+														</span>
+													</Table.Cell>
+												</Table.Row>
+											{/if}
+										{/each}
+									</Table.Body>
+								</Table.Root>
+							</div>
+						{/if}
 					{/each}
 				</div>
 			</div>

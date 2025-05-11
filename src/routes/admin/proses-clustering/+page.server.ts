@@ -62,37 +62,36 @@ function consistentKMeansPlusPlus(data: number[][], k: number, seed: number): nu
 	return centroids
 }
 
-// Fungsi untuk menghitung centroid baru berdasarkan anggota cluster
+// Fungsi untuk menghitung centroid baru (yang sebelumnya hilang)
 function calculateNewCentroids(data: number[][], assignments: number[], k: number): number[][] {
-	const newCentroids: number[][] = []
-	const clusterSums: { [key: number]: { sum: number[]; count: number } } = {}
+	const newCentroids: number[][] = Array(k)
+		.fill(0)
+		.map(() => Array(data[0].length).fill(0))
+	const clusterCounts: number[] = Array(k).fill(0)
 
-	// Inisialisasi
-	for (let i = 0; i < k; i++) {
-		clusterSums[i] = { sum: new Array(data[0].length).fill(0), count: 0 }
-	}
-
-	// Hitung jumlah dan count untuk setiap cluster
+	// Hitung jumlah untuk setiap cluster
 	for (let i = 0; i < data.length; i++) {
 		const cluster = assignments[i]
+		clusterCounts[cluster]++
 		for (let j = 0; j < data[i].length; j++) {
-			clusterSums[cluster].sum[j] += data[i][j]
+			newCentroids[cluster][j] += data[i][j]
 		}
-		clusterSums[cluster].count++
 	}
 
 	// Hitung rata-rata untuk setiap cluster
 	for (let i = 0; i < k; i++) {
-		const centroid = clusterSums[i].sum.map((val) =>
-			clusterSums[i].count > 0 ? val / clusterSums[i].count : 0
-		)
-		newCentroids.push(centroid)
+		if (clusterCounts[i] > 0) {
+			for (let j = 0; j < newCentroids[i].length; j++) {
+				newCentroids[i][j] /= clusterCounts[i]
+			}
+		}
 	}
 
 	return newCentroids
 }
 
 export const load: PageServerLoad = async () => {
+	// ... (kode sebelumnya tetap sama)
 	// 1. Ambil data warga dengan semua relasinya
 	const dataWarga = await db.dataWarga.findMany({
 		include: {
@@ -151,16 +150,47 @@ export const load: PageServerLoad = async () => {
 		// Hitung centroid baru
 		const newCentroids = calculateNewCentroids(features, newAssignments, 2)
 
-		// Cek konvergensi (apakah assignment berubah)
+		// Cek konvergensi (apakah assignment berubah atau centroid sama)
+		const centroidsEqual =
+			euclideanDistance(centroids[0], newCentroids[0]) === 0 &&
+			euclideanDistance(centroids[1], newCentroids[1]) === 0
+
 		converged =
-			assignments.length > 0 && newAssignments.every((val, idx) => val === assignments[idx])
+			centroidsEqual ||
+			(assignments.length > 0 && newAssignments.every((val, idx) => val === assignments[idx]))
 
 		// Update centroid dan assignments untuk iterasi berikutnya
 		centroids = newCentroids
 		assignments = newAssignments
 	}
 
-	// 6. Format hasil akhir untuk ditampilkan
+	// 6. Jika setelah iterasi maksimal centroid belum sama, lakukan iterasi tambahan
+	if (!converged && iterationCount === 10) {
+		iterationCount++
+		const newAssignments: number[] = []
+		const distancesToCentroids: { c1: number; c2: number }[] = []
+
+		// Hitung jarak dan tentukan cluster untuk setiap data
+		for (const point of features) {
+			const distC1 = euclideanDistance(point, centroids[0])
+			const distC2 = euclideanDistance(point, centroids[1])
+			const assignedCluster = distC1 < distC2 ? 0 : 1
+			newAssignments.push(assignedCluster)
+			distancesToCentroids.push({ c1: distC1, c2: distC2 })
+		}
+
+		// Simpan hasil iterasi tambahan
+		iterations.push({
+			iteration: iterationCount,
+			centroids: [...centroids],
+			assignments: [...newAssignments],
+			distances: [...distancesToCentroids]
+		})
+
+		assignments = newAssignments
+	}
+
+	// 7. Format hasil akhir untuk ditampilkan
 	const clusteringResults = dataWarga.map((warga, idx) => ({
 		id: warga.id,
 		nama: warga.nama_warga,
