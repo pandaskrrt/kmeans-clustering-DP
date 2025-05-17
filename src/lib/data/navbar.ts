@@ -21,8 +21,12 @@ export const adminNavMenu: AdminNavMenutype = [
 		icon: Users,
 		items: [
 			{
-				title: 'Data Warga',
-				url: '/admin/data-warga'
+				title: 'Data Warga 2025',
+				url: '/admin/data-warga-2025'
+			},
+			{
+				title: 'Data Warga 2026',
+				url: '/admin/data-warga-2026'
 			}
 		]
 	},

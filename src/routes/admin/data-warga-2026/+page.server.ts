@@ -3,7 +3,16 @@ import type { Actions } from '@sveltejs/kit'
 import type { PageServerLoad } from './$types'
 
 export const load: PageServerLoad = async () => {
+	const startDate = new Date('2026-01-01')
+	const endDate = new Date('2026-12-31')
+
 	const dataWarga = await db.dataWarga.findMany({
+		where: {
+			createdAt: {
+				gte: startDate,
+				lte: endDate
+			}
+		},
 		include: {
 			jumlahKeluarga: true,
 			bangunanRumah: true,
@@ -11,6 +20,9 @@ export const load: PageServerLoad = async () => {
 			Pertanian: true,
 			kendaraan: true,
 			penghasilan: true
+		},
+		orderBy: {
+			createdAt: 'desc'
 		}
 	})
 
@@ -25,9 +37,9 @@ export const actions: Actions = {
 		try {
 			await db.dataWarga.delete({ where: { id } })
 
-			return { success: 'Barang berhasil dihapus!' }
+			return { success: 'Data warga berhasil dihapus!' }
 		} catch {
-			return { error: 'Barang gagal dihapus!' }
+			return { error: 'Data warga gagal dihapus!' }
 		}
 	}
 }

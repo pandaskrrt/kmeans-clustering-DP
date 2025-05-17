@@ -31,6 +31,8 @@
 			<Table.Header>
 				<Table.Row>
 					<Table.Head class="w-[50px] text-center">No</Table.Head>
+					<Table.Head>Tanggal Input</Table.Head>
+					<!-- Kolom baru -->
 					<Table.Head>Nama Kepala</Table.Head>
 					<Table.Head>NIK</Table.Head>
 					<Table.Head>Jumlah Keluarga</Table.Head>
@@ -38,7 +40,6 @@
 					<Table.Head>Kendaraan</Table.Head>
 					<Table.Head>Pertanian</Table.Head>
 					<Table.Head>Penghasilan</Table.Head>
-
 					<Table.Head class="text-right">Aksi</Table.Head>
 				</Table.Row>
 			</Table.Header>
@@ -50,6 +51,13 @@
 							.includes(search.toLowerCase())) as item, index (item.id)}
 						<Table.Row>
 							<Table.Cell class="text-center">{index + 1}</Table.Cell>
+							<Table.Cell>
+								{new Date(item.createdAt).toLocaleDateString('id-ID', {
+									day: '2-digit',
+									month: '2-digit',
+									year: 'numeric'
+								})}
+							</Table.Cell>
 							<Table.Cell>{item.nama_warga}</Table.Cell>
 							<Table.Cell>{item.nik}</Table.Cell>
 							<Table.Cell>{item.jumlahKeluarga?.jumlahKeluarga}</Table.Cell>
@@ -58,7 +66,7 @@
 							<Table.Cell>{item.Pertanian?.lahanSawah}</Table.Cell>
 							<Table.Cell>{item.penghasilan?.penghasilan}</Table.Cell>
 							<Table.Cell class="text-right">
-								{#if data.session.role === 'ADMIN'}
+								{#if data.session?.role === 'ADMIN'}
 									<div class="actions">
 										<Button
 											size="sm"
@@ -80,8 +88,8 @@
 					{/each}
 				{:else}
 					<Table.Row>
-						<Table.Cell colspan={4} class="no-data text-center"
-							>Data masih belum tersedia</Table.Cell
+						<Table.Cell colspan={10} class="no-data text-center"
+							>Tidak ada data warga untuk tahun 2026</Table.Cell
 						>
 					</Table.Row>
 				{/if}
