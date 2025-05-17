@@ -45,7 +45,7 @@ function consistentKMeansPlusPlus(data: number[][], k: number, seed: number): nu
 		// Pilih titik berikutnya berdasarkan probabilitas dengan seed yang konsisten
 		const probabilities = distances.map((d) => d / totalDistance)
 		let cumulativeProb = 0
-		const randomValue = seededRandom(seed + c) // Seed berbeda untuk setiap centroid
+		const randomValue = seededRandom(seed + c)
 		let selectedIdx = 0
 
 		for (let i = 0; i < probabilities.length; i++) {
@@ -93,8 +93,14 @@ function calculateNewCentroids(data: number[][], assignments: number[], k: numbe
 }
 
 export const load: PageServerLoad = async () => {
-	// 1. Ambil data warga dengan semua relasinya
+	// 1. Ambil data warga dengan semua relasinya, hanya untuk tahun 2026
 	const dataWarga = await db.dataWarga.findMany({
+		where: {
+			createdAt: {
+				gte: new Date('2026-01-01'),
+				lte: new Date('2026-12-31')
+			}
+		},
 		include: {
 			jumlahKeluarga: true,
 			bangunanRumah: true,
@@ -115,17 +121,29 @@ export const load: PageServerLoad = async () => {
 		warga.penghasilan?.bobot || 0
 	])
 
-	// 3. Gunakan seed tetap untuk konsistensi
-	const seed = 12345 // Seed tetap untuk hasil yang konsisten
+	// 3. Jika tidak ada data, kembalikan hasil kosong
+	if (dataWarga.length === 0) {
+		return {
+			dataWarga: [],
+			clusteringResults: [],
+			iterations: [],
+			finalCentroids: [],
+			converged: false,
+			iterationCount: 0
+		}
+	}
 
-	// 4. Inisialisasi centroid dengan K-Means++
+	// 4. Gunakan seed tetap untuk konsistensi
+	const seed = 12345
+
+	// 5. Inisialisasi centroid dengan K-Means++
 	let centroids = consistentKMeansPlusPlus(features, 2, seed)
 	let assignments: number[] = []
 	let iterations = []
 	let converged = false
 	let iterationCount = 0
 
-	// 5. Lakukan iterasi sampai konvergen atau maksimal 10 iterasi
+	// 6. Lakukan iterasi sampai konvergen atau maksimal 10 iterasi
 	while (!converged && iterationCount < 10) {
 		iterationCount++
 		const newAssignments: number[] = []
@@ -151,16 +169,16 @@ export const load: PageServerLoad = async () => {
 		// Hitung centroid baru
 		const newCentroids = calculateNewCentroids(features, newAssignments, 2)
 
-		// Cek konvergensi (apakah assignment berubah)
+		// Cek konvergensi
 		converged =
 			assignments.length > 0 && newAssignments.every((val, idx) => val === assignments[idx])
 
-		// Update centroid dan assignments untuk iterasi berikutnya
+		// Update centroid dan assignments
 		centroids = newCentroids
 		assignments = newAssignments
 	}
 
-	// 6. Format hasil akhir untuk ditampilkan
+	// 7. Format hasil akhir untuk ditampilkan
 	const clusteringResults = dataWarga.map((warga, idx) => ({
 		id: warga.id,
 		nama: warga.nama_warga,

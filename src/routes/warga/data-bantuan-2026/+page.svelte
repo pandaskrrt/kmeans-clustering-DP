@@ -15,7 +15,7 @@
 </script>
 
 <div class="container max-w-7xl">
-	<h2 class="title">Data Warga</h2>
+	<h2 class="title">Data Warga 2026</h2>
 
 	<div class="search-box">
 		<Input type="text" placeholder="Cari Nama Warga..." bind:value={search} />
@@ -25,7 +25,7 @@
 	{#if data.clusteringResults && data.clusteringResults.length > 0}
 		<div class="clustering-section">
 			<div class="card">
-				<h3>Hasil Data</h3>
+				<h3>Hasil Clustering 2026</h3>
 				<div class="table-container single-iteration">
 					<Table.Root>
 						<Table.Header>
@@ -40,22 +40,16 @@
 						<Table.Body>
 							{#each data.clusteringResults as result, i}
 								{#if result.nama.toLowerCase().includes(search.toLowerCase())}
-									<Table.Row
-										class={data.iterations[0].assignments[i] === 0 ? 'cluster-1' : 'cluster-2'}
-									>
+									<Table.Row class={result.cluster === 0 ? 'cluster-1' : 'cluster-2'}>
 										<Table.Cell>{i + 1}</Table.Cell>
 										<Table.Cell>{result.nama}</Table.Cell>
 										<Table.Cell>{result.nik}</Table.Cell>
-										<Table.Cell>Cluster {data.iterations[0].assignments[i] + 1}</Table.Cell>
+										<Table.Cell>Cluster {result.cluster + 1}</Table.Cell>
 										<Table.Cell>
 											<span
-												class="status-badge {data.iterations[0].assignments[i] === 0
-													? 'eligible'
-													: 'not-eligible'}"
+												class="status-badge {result.cluster === 0 ? 'eligible' : 'not-eligible'}"
 											>
-												{data.iterations[0].assignments[i] === 0
-													? 'Mendapatkan Bantuan'
-													: 'Tidak Mendapatkan Bantuan'}
+												{result.cluster === 0 ? 'Mendapatkan Bantuan' : 'Tidak Mendapatkan Bantuan'}
 											</span>
 										</Table.Cell>
 									</Table.Row>
@@ -78,6 +72,10 @@
 					<p>Warga</p>
 				</div>
 			</div>
+		</div>
+	{:else}
+		<div class="card">
+			<p>Data tidak tersedia untuk tahun 2026.</p>
 		</div>
 	{/if}
 </div>
@@ -134,13 +132,11 @@
 		margin-bottom: 1rem;
 	}
 
-	/* Modified for single table layout */
 	.single-iteration {
 		width: 100%;
 		max-width: 100%;
 	}
 
-	/* Status Badge */
 	.status-badge {
 		display: inline-block;
 		padding: 0.25rem 0.5rem;
@@ -159,7 +155,6 @@
 		color: white;
 	}
 
-	/* Summary Card */
 	.summary-card {
 		display: grid;
 		grid-template-columns: 1fr 1fr;
@@ -195,7 +190,6 @@
 		color: var(--color-danger);
 	}
 
-	/* Responsive */
 	@media (max-width: 768px) {
 		.summary-card {
 			grid-template-columns: 1fr;
