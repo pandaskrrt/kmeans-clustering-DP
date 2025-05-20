@@ -16,7 +16,7 @@
 
 	<div class="table-header">
 		<div class="left-toolbar">
-			<Button href="/admin/data-warga/tambah">
+			<Button href="/admin/data-warga-2026/tambah">
 				<Plus class="icon" />
 				<span>Tambahkan Data</span>
 			</Button>

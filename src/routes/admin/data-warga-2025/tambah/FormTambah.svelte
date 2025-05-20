@@ -219,7 +219,7 @@
 	{/if}
 
 	<div class="space-x-2 self-end pt-4">
-		<a href="/admin/penghasilan" class={buttonVariants({ variant: 'secondary' })}>Back</a>
+		<a href="/admin/data-warga-2025" class={buttonVariants({ variant: 'secondary' })}>Back</a>
 		<Form.Button disabled={loading}>Submit</Form.Button>
 	</div>
 </form>
