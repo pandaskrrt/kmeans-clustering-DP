@@ -2,19 +2,58 @@
 	import { Input } from '$lib/components/ui/input'
 	import * as Table from '$lib/components/ui/table'
 	import type { PageData } from './$types'
+	import * as Pagination from '$lib/components/ui/pagination'
+	import ChevronLeftIcon from 'lucide-svelte/icons/chevron-left'
+	import ChevronRightIcon from 'lucide-svelte/icons/chevron-right'
 
 	let { data }: { data: PageData } = $props()
 	let search = $state<string>('')
 
-	let currentIteration = $state(0)
+	// Pagination for Data Warga
+	let currentPageWarga = $state<number>(1)
+	const perPageWarga = 10
+	const siblingCount = 1
+
+	// Pagination for Clustering Results
+	let currentPageClustering = $state<number>(1)
+	const perPageClustering = 10
+
+	// Filter data based on search
+	const filteredData = $derived(
+		data.dataWarga.filter((item) =>
+			item.nama_warga.toString().toLowerCase().includes(search.toLowerCase())
+		)
+	)
+	// Total items for Data Warga pagination
+	const totalItemsWarga = $derived(filteredData.length)
+	// Paginated data for current page (Data Warga)
+	const paginatedData = $derived(
+		filteredData.slice((currentPageWarga - 1) * perPageWarga, currentPageWarga * perPageWarga)
+	)
+
+	// Filter clustering results based on search
+	const filteredClusteringResults = $derived(
+		data.clusteringResults?.filter((result) =>
+			result.nama.toLowerCase().includes(search.toLowerCase())
+		) || []
+	)
+	// Total items for Clustering Results pagination
+	const totalItemsClustering = $derived(filteredClusteringResults.length)
+	// Paginated clustering results for current page
+	const paginatedClusteringResults = $derived(
+		filteredClusteringResults.slice(
+			(currentPageClustering - 1) * perPageClustering,
+			currentPageClustering * perPageClustering
+		)
+	)
 
 	// Nama kriteria untuk tampilan
 	const criteriaNames = [
 		'Jumlah Keluarga',
 		'Bangunan Rumah',
 		'Peternakan',
-		'Pertanian',
 		'Kendaraan',
+		'Pertanian',
 		'Penghasilan'
 	]
 
@@ -33,7 +72,6 @@
 		<Input type="text" placeholder="Cari Nama Warga..." bind:value={search} />
 	</div>
 
-	<!-- Tabel Data Utama -->
 	<div class="card">
 		<h3>Data Warga</h3>
 		<div class="table-container">
@@ -51,13 +89,12 @@
 					</Table.Row>
 				</Table.Header>
 				<Table.Body>
-					{#if data.dataWarga.length > 0}
-						{#each data.dataWarga.filter((item) => item.nama_warga
-								.toString()
-								.toLowerCase()
-								.includes(search.toLowerCase())) as item, index (item.id)}
+					{#if paginatedData.length > 0}
+						{#each paginatedData as item, index (item.id)}
 							<Table.Row>
-								<Table.Cell class="text-center">{index + 1}</Table.Cell>
+								<Table.Cell class="text-center">
+									{index + 1 + (currentPageWarga - 1) * perPageWarga}
+								</Table.Cell>
 								<Table.Cell>{item.nama_warga}</Table.Cell>
 								<Table.Cell>{item.jumlahKeluarga?.bobot}</Table.Cell>
 								<Table.Cell>{item.bangunanRumah?.bobot}</Table.Cell>
@@ -75,110 +112,213 @@
 				</Table.Body>
 			</Table.Root>
 		</div>
+		<!-- Pagination for Data Warga -->
+		{#if totalItemsWarga > perPageWarga}
+			<div class="pagination-wrapper">
+				<Pagination.Root
+					count={totalItemsWarga}
+					{perPageWarga}
+					{siblingCount}
+					page={currentPageWarga}
+					onPageChange={(page) => (currentPageWarga = page)}
+				>
+					{#snippet children({ pages })}
+						<Pagination.Content>
+							<Pagination.Item>
+								<Pagination.PrevButton>
+									<ChevronLeftIcon class="size-4" />
+									<span class="hidden sm:block">Previous</span>
+								</Pagination.PrevButton>
+							</Pagination.Item>
+							{#each pages as page (page.key)}
+								{#if page.type === 'ellipsis'}
+									<Pagination.Item>
+										<Pagination.Ellipsis />
+									</Pagination.Item>
+								{:else}
+									<Pagination.Item>
+										<Pagination.Link {page} isActive={currentPageWarga === page.value}>
+											{page.value}
+										</Pagination.Link>
+									</Pagination.Item>
+								{/if}
+							{/each}
+							<Pagination.Item>
+								<Pagination.NextButton>
+									<span class="hidden sm:block">Next</span>
+									<ChevronRightIcon class="size-4" />
+								</Pagination.NextButton>
+							</Pagination.Item>
+						</Pagination.Content>
+					{/snippet}
+				</Pagination.Root>
+			</div>
+		{/if}
 	</div>
 
 	<!-- Hasil Clustering -->
-	{#if data.clusteringResults && data.clusteringResults.length > 0}
+	{#if filteredClusteringResults.length > 0}
 		<div class="clustering-section">
-			<!-- Centroid untuk Iterasi 1 dan 2 -->
+			<!-- Centroid untuk Semua Iterasi -->
 			<div class="card">
 				<h3>Centroid</h3>
-				<div class="iteration-grid">
-					{#each [0, 1, 2] as iter}
-						{#if data.iterations[iter]}
-							<div class="table-container">
-								<h4
-									class="flex items-center rounded-t-lg border-b border-gray-200 bg-gray-100 px-4 py-2 text-lg font-semibold text-gray-800"
+				<div class="iteration-stack">
+					{#each data.iterations as iter, index (index)}
+						<div class="table-container">
+							<h4
+								class="flex items-center rounded-t-lg border-b border-gray-200 bg-gray-100 px-4 py-2 text-lg font-semibold text-gray-800"
+							>
+								<span
+									class="mr-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-blue-500 text-sm text-white"
 								>
-									<span
-										class="mr-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-blue-500 text-sm text-white"
-									>
-										{iter + 1}
-									</span>
-									Iterasi {iter + 1}
-								</h4>
-								<Table.Root>
-									<Table.Header>
+									{index + 1}
+								</span>
+								Iterasi {index + 1}
+							</h4>
+							<Table.Root>
+								<Table.Header>
+									<Table.Row>
+										<Table.Head class="header-cell">Kriteria</Table.Head>
+										<Table.Head class="header">Cluster 1</Table.Head>
+										<Table.Head class="header">Cluster 2</Table.Head>
+									</Table.Row>
+								</Table.Header>
+								<Table.Body>
+									{#each criteriaNames as name, i}
 										<Table.Row>
-											<Table.Head>Kriteria</Table.Head>
-											<Table.Head>Cluster 1</Table.Head>
-											<Table.Head>Cluster 2</Table.Head>
+											<Table.Cell>{name}</Table.Cell>
+											<Table.Cell>{iter.centroids[0][i].toFixed(2)}</Table.Cell>
+											<Table.Cell>{iter.centroids[1][i].toFixed(2)}</Table.Cell>
 										</Table.Row>
-									</Table.Header>
-									<Table.Body>
-										{#each criteriaNames as name, i}
-											<Table.Row>
-												<Table.Cell>{name}</Table.Cell>
-												<Table.Cell>{data.iterations[iter].centroids[0][i].toFixed(2)}</Table.Cell>
-												<Table.Cell>{data.iterations[iter].centroids[1][i].toFixed(2)}</Table.Cell>
-											</Table.Row>
-										{/each}
-									</Table.Body>
-								</Table.Root>
-							</div>
-						{/if}
+									{/each}
+								</Table.Body>
+							</Table.Root>
+						</div>
 					{/each}
 				</div>
 			</div>
 
-			<!-- Hasil Clustering untuk Iterasi 1 dan 2 -->
+			<!-- Hasil Clustering untuk Per Iterasi -->
 			<div class="card">
 				<h3>Hasil Clustering</h3>
-				<div class="iteration-grid">
-					{#each [0, 1, 2] as iter}
-						{#if data.iterations[iter]}
-							<div class="table-container">
-								<h4
-									class="flex items-center rounded-t-lg border-b border-gray-200 bg-gray-100 px-4 py-2 text-lg font-semibold text-gray-800"
+				<div class="iteration-stack">
+					{#each data.iterations as iter, index (index)}
+						<!-- Per-iteration Summary -->
+						{@const eligibleCount = iter.assignments.reduce(
+							(count, assignment) => count + (assignment === 0 ? 1 : 0),
+							0
+						)}
+						{@const ineligibleCount = iter.assignments.length - eligibleCount}
+						<div class="summary-card iteration-summary">
+							<div class="summary-item eligible">
+								<h4>Layak</h4>
+								<p class="count">{eligibleCount}</p>
+								<p>Warga</p>
+							</div>
+							<div class="summary-item not-eligible">
+								<h4>Tidak Layak</h4>
+								<p class="count">{ineligibleCount}</p>
+								<p>Warga</p>
+							</div>
+						</div>
+
+						<div class="table-container">
+							<h4
+								class="flex items-center rounded-t-lg border-b border-gray-200 bg-gray-100 px-4 py-2 text-lg font-semibold text-gray-800"
+							>
+								<span
+									class="mr-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-blue-500 text-sm text-white"
 								>
-									<span
-										class="mr-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-blue-500 text-sm text-white"
-									>
-										{iter + 1}
-									</span>
-									Iterasi {iter + 1}
-								</h4>
-								<Table.Root>
-									<Table.Header>
+									{index + 1}
+								</span>
+								Iterasi {index + 1}
+							</h4>
+							<Table.Root>
+								<Table.Header>
+									<Table.Row>
+										<Table.Head>No</Table.Head>
+										<Table.Head>Nama</Table.Head>
+										<Table.Head>Jarak ke C1</Table.Head>
+										<Table.Head>Jarak ke C2</Table.Head>
+										<Table.Head>Cluster</Table.Head>
+										<Table.Head>Kelayakan</Table.Head>
+									</Table.Row>
+								</Table.Header>
+								<Table.Body>
+									{#each paginatedClusteringResults as result, i}
+										{@const iterIndex = data.clusteringResults.findIndex((r) => r.id === result.id)}
+										{#if iterIndex !== -1}
+											<Table.Row
+												class={iter.assignments[iterIndex] === 0 ? 'cluster-1' : 'cluster-2'}
+											>
+												<Table.Cell>
+													{i + 1 + (currentPageClustering - 1) * perPageClustering}
+												</Table.Cell>
+												<Table.Cell>{result.nama}</Table.Cell>
+												<Table.Cell>{iter.distances[iterIndex].c1.toFixed(2)}</Table.Cell>
+												<Table.Cell>{iter.distances[iterIndex].c2.toFixed(2)}</Table.Cell>
+												<Table.Cell>Cluster {iter.assignments[iterIndex] + 1}</Table.Cell>
+												<Table.Cell>
+													<span
+														class="status-badge {iter.assignments[iterIndex] === 0
+															? 'eligible'
+															: 'not-eligible'}"
+													>
+														{iter.assignments[iterIndex] === 0 ? 'Layak' : 'Tidak Layak'}
+													</span>
+												</Table.Cell>
+											</Table.Row>
+										{/if}
+									{:else}
 										<Table.Row>
-											<Table.Head>No</Table.Head>
-											<Table.Head>Nama</Table.Head>
-											<Table.Head>Jarak ke C1</Table.Head>
-											<Table.Head>Jarak ke C2</Table.Head>
-											<Table.Head>Cluster</Table.Head>
-											<Table.Head>Kelayakan</Table.Head>
+											<Table.Cell colspan={6} class="no-data text-center">
+												Tidak ada data clustering
+											</Table.Cell>
 										</Table.Row>
-									</Table.Header>
-									<Table.Body>
-										{#each data.clusteringResults as result, i}
-											{#if result.nama.toLowerCase().includes(search.toLowerCase())}
-												<Table.Row
-													class={data.iterations[iter].assignments[i] === 0
-														? 'cluster-1'
-														: 'cluster-2'}
-												>
-													<Table.Cell>{i + 1}</Table.Cell>
-													<Table.Cell>{result.nama}</Table.Cell>
-													<Table.Cell>{data.iterations[iter].distances[i].c1.toFixed(2)}</Table.Cell
-													>
-													<Table.Cell>{data.iterations[iter].distances[i].c2.toFixed(2)}</Table.Cell
-													>
-													<Table.Cell>Cluster {data.iterations[iter].assignments[i] + 1}</Table.Cell
-													>
-													<Table.Cell>
-														<span
-															class="status-badge {data.iterations[iter].assignments[i] === 0
-																? 'eligible'
-																: 'not-eligible'}"
-														>
-															{data.iterations[iter].assignments[i] === 0 ? 'Layak' : 'Tidak Layak'}
-														</span>
-													</Table.Cell>
-												</Table.Row>
-											{/if}
-										{/each}
-									</Table.Body>
-								</Table.Root>
+									{/each}
+								</Table.Body>
+							</Table.Root>
+						</div>
+						<!-- Pagination for Clustering Results -->
+						{#if totalItemsClustering > perPageClustering}
+							<div class="pagination-wrapper">
+								<Pagination.Root
+									count={totalItemsClustering}
+									{perPageClustering}
+									{siblingCount}
+									page={currentPageClustering}
+									onPageChange={(page) => (currentPageClustering = page)}
+								>
+									{#snippet children({ pages })}
+										<Pagination.Content>
+											<Pagination.Item>
+												<Pagination.PrevButton>
+													<ChevronLeftIcon class="size-4" />
+													<span class="hidden sm:block">Previous</span>
+												</Pagination.PrevButton>
+											</Pagination.Item>
+											{#each pages as page (page.key)}
+												{#if page.type === 'ellipsis'}
+													<Pagination.Item>
+														<Pagination.Ellipsis />
+													</Pagination.Item>
+												{:else}
+													<Pagination.Item>
+														<Pagination.Link {page} isActive={currentPageClustering === page.value}>
+															{page.value}
+														</Pagination.Link>
+													</Pagination.Item>
+												{/if}
+											{/each}
+											<Pagination.Item>
+												<Pagination.NextButton>
+													<span class="hidden sm:block">Next</span>
+													<ChevronRightIcon class="size-4" />
+												</Pagination.NextButton>
+											</Pagination.Item>
+										</Pagination.Content>
+									{/snippet}
+								</Pagination.Root>
 							</div>
 						{/if}
 					{/each}
@@ -284,10 +424,14 @@
 		margin-bottom: 1rem;
 	}
 
-	.iteration-grid {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
+	.iteration-stack {
+		display: flex;
+		flex-direction: column;
 		gap: 1rem;
+	}
+
+	.iteration-summary {
+		margin-bottom: 1rem;
 	}
 
 	/* Status Badge */
@@ -359,10 +503,20 @@
 		color: var(--color-danger);
 	}
 
+	.error {
+		color: var(--color-danger);
+		margin-bottom: 1rem;
+		font-weight: 500;
+	}
+
+	.pagination-wrapper {
+		margin-top: 1rem;
+	}
+
 	/* Responsive */
 	@media (max-width: 768px) {
-		.iteration-grid,
-		.summary-card {
+		.summary-card,
+		.iteration-summary {
 			grid-template-columns: 1fr;
 		}
 

@@ -2,13 +2,31 @@
 	import { Button } from '$lib/components/ui/button'
 	import { Input } from '$lib/components/ui/input'
 	import * as Table from '$lib/components/ui/table'
+	import * as Pagination from '$lib/components/ui/pagination'
 	import Plus from 'lucide-svelte/icons/plus'
-	import Replace from 'lucide-svelte/icons/replace'
+	import ChevronLeftIcon from 'lucide-svelte/icons/chevron-left'
+	import ChevronRightIcon from 'lucide-svelte/icons/chevron-right'
 	import { enhance } from '$app/forms'
 	import type { PageData } from './$types'
 
 	let { data }: { data: PageData } = $props()
 	let search = $state<string>('')
+	let currentPage = $state<number>(1)
+	const perPage = 10
+	const siblingCount = 1
+
+	// Filter data based on search
+	const filteredData = $derived(
+		data.dataWarga.filter((item) =>
+			item.nama_warga.toString().toLowerCase().includes(search.toLowerCase())
+		)
+	)
+	// Total items for pagination
+	const totalItems = $derived(filteredData.length)
+	// Paginated data for current page
+	const paginatedData = $derived(
+		filteredData.slice((currentPage - 1) * perPage, currentPage * perPage)
+	)
 </script>
 
 <div class="container">
@@ -32,7 +50,6 @@
 				<Table.Row>
 					<Table.Head class="w-[50px] text-center">No</Table.Head>
 					<Table.Head>Tanggal Input</Table.Head>
-					<!-- Kolom baru -->
 					<Table.Head>Nama Kepala</Table.Head>
 					<Table.Head>NIK</Table.Head>
 					<Table.Head>Jumlah Keluarga</Table.Head>
@@ -44,13 +61,12 @@
 				</Table.Row>
 			</Table.Header>
 			<Table.Body>
-				{#if data.dataWarga.length > 0}
-					{#each data.dataWarga.filter((item) => item.nama_warga
-							.toString()
-							.toLowerCase()
-							.includes(search.toLowerCase())) as item, index (item.id)}
+				{#if paginatedData.length > 0}
+					{#each paginatedData as item, index (item.id)}
 						<Table.Row>
-							<Table.Cell class="text-center">{index + 1}</Table.Cell>
+							<Table.Cell class="text-center">
+								{index + 1 + (currentPage - 1) * perPage}
+							</Table.Cell>
 							<Table.Cell>
 								{new Date(item.createdAt).toLocaleDateString('id-ID', {
 									day: '2-digit',
@@ -96,6 +112,49 @@
 			</Table.Body>
 		</Table.Root>
 	</div>
+
+	<!-- Pagination -->
+	{#if totalItems > perPage}
+		<div class="pagination-wrapper">
+			<Pagination.Root
+				count={totalItems}
+				{perPage}
+				{siblingCount}
+				page={currentPage}
+				onPageChange={(page) => (currentPage = page)}
+			>
+				{#snippet children({ pages })}
+					<Pagination.Content>
+						<Pagination.Item>
+							<Pagination.PrevButton>
+								<ChevronLeftIcon class="size-4" />
+								<span class="hidden sm:block">Previous</span>
+							</Pagination.PrevButton>
+						</Pagination.Item>
+						{#each pages as page (page.key)}
+							{#if page.type === 'ellipsis'}
+								<Pagination.Item>
+									<Pagination.Ellipsis />
+								</Pagination.Item>
+							{:else}
+								<Pagination.Item>
+									<Pagination.Link {page} isActive={currentPage === page.value}>
+										{page.value}
+									</Pagination.Link>
+								</Pagination.Item>
+							{/if}
+						{/each}
+						<Pagination.Item>
+							<Pagination.NextButton>
+								<span class="hidden sm:block">Next</span>
+								<ChevronRightIcon class="size-4" />
+							</Pagination.NextButton>
+						</Pagination.Item>
+					</Pagination.Content>
+				{/snippet}
+			</Pagination.Root>
+		</div>
+	{/if}
 </div>
 
 <style>
@@ -147,6 +206,12 @@
 	.no-action {
 		color: #64748b;
 		font-style: italic;
+	}
+
+	.pagination-wrapper {
+		margin-top: 1.5rem;
+		display: flex;
+		justify-content: center;
 	}
 
 	@media (max-width: 768px) {
