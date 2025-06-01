@@ -32,7 +32,6 @@
 							<Table.Row>
 								<Table.Head>No</Table.Head>
 								<Table.Head>Nama</Table.Head>
-								<Table.Head>NIK</Table.Head>
 								<Table.Head>Cluster</Table.Head>
 								<Table.Head>Kelayakan</Table.Head>
 							</Table.Row>
@@ -45,7 +44,6 @@
 									>
 										<Table.Cell>{i + 1}</Table.Cell>
 										<Table.Cell>{result.nama}</Table.Cell>
-										<Table.Cell>{result.nik}</Table.Cell>
 										<Table.Cell>Cluster {data.iterations[0].assignments[i] + 1}</Table.Cell>
 										<Table.Cell>
 											<span
